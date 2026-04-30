@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Cloud Shopping Cart</title>
+  <style>
+    :root {
+      --color-bg: #f4f6f9;
+      --color-surface: #ffffff;
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-danger: #ef4444;
+      --color-danger-hover: #dc2626;
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-border: #e2e8f0;
+      --color-success: #22c55e;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+      --transition: 0.18s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header-title .icon { font-size: 1.5rem; }
+
+    .cloud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #fff;
+      background: #94a3b8;
+      transition: background var(--transition);
+    }
+    .cloud-badge.aws   { background: #f97316; }
+    .cloud-badge.gcp   { background: #16a34a; }
+    .cloud-badge.azure { background: #3b82f6; }
+    .cloud-badge.local { background: #64748b; }
+
+    /* ── Layout ── */
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    /* ── Section headers ── */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Product catalog ── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-card {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      padding: 1.2rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    }
+
+    .product-emoji { font-size: 2rem; }
+
+    .product-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.35;
+      flex: 1;
+    }
+
+    .product-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.87rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--color-danger);
+      border: 1px solid var(--color-danger);
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+    }
+    .btn-danger:hover {
+      background: var(--color-danger);
+      color: #fff;
+    }
+
+    /* ── Cart panel ── */
+    .cart-panel {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: sticky;
+      top: 80px;
+    }
+
+    .cart-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cart-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .cart-count {
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .cart-items { padding: 0.75rem 1.25rem; min-height: 80px; }
+
+    .cart-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      color: var(--color-text-muted);
+      gap: 0.5rem;
+      text-align: center;
+    }
+    .cart-empty .empty-icon { font-size: 2.5rem; }
+    .cart-empty p { font-size: 0.9rem; }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .cart-item:last-child { border-bottom: none; }
+
+    .cart-item-info { flex: 1; min-width: 0; }
+
+    .cart-item-name {
+      font-size: 0.87rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cart-item-meta {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .cart-item-subtotal {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--color-text);
+      white-space: nowrap;
+      margin-right: 0.5rem;
+    }
+
+    .cart-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--color-border);
+      background: #f8fafc;
+    }
+
+    .cart-total {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .cart-total-amount { color: var(--color-primary); font-size: 1.2rem; }
+
+    /* ── Loading / error ── */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+    }
+
+    .error-banner {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <span class="icon">🛒</span>
+    Multi-Cloud Shopping Cart
+  </div>
+  <div id="cloud-badge" class="cloud-badge local">
+    ☁️ &nbsp;local
+  </div>
+</header>
+
+<main>
+  <!-- Left: catalog -->
+  <section>
+    <div class="section-title">Product Catalog</div>
+    <div id="error-banner" class="error-banner" style="display:none;"></div>
+    <div id="product-grid" class="product-grid">
+      <div class="loading">Loading products…</div>
+    </div>
+  </section>
+
+  <!-- Right: cart -->
+  <aside>
+    <div class="cart-panel">
+      <div class="cart-header">
+        <h2>🛍️ Your Cart</h2>
+        <span id="cart-count" class="cart-count">0</span>
+      </div>
+      <div id="cart-items" class="cart-items">
+        <div class="cart-empty">
+          <span class="empty-icon">🛒</span>
+          <p>Your cart is empty</p>
+          <p>Add some products to get started!</p>
+        </div>
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total</span>
+          <span id="cart-total" class="cart-total-amount">$0.00</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  const API_BASE_URL = 'http://localhost:8080';
+
+  const PRODUCT_EMOJIS = {
+    p1: '📘', p2: '☁️', p3: '⚙️', p4: '🔧', p5: '✨',
+  };
+
+  function apiUrl(path) {
+    return API_BASE_URL + path;
+  }
+
+  function fmt(price) {
+    return '$' + price.toFixed(2);
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-banner');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+
+  async function fetchCloud() {
+    try {
+      const res = await fetch(apiUrl('/api/cloud'));
+      const raw = await res.text();
+      let data = null;
+      try {
+        data = JSON.parse(raw);
+      } catch (_) {
+        // Keep data as null when response is not valid JSON.
+      }
+
+      if (!res.ok) {
+        console.error('Failed /api/cloud response:', {
+          status: res.status,
+          statusText: res.statusText,
+          body: data || raw,
+        });
+        throw new Error('status ' + res.status);
+      }
+
+      if (!data) {
+        console.error('Invalid JSON from /api/cloud:', {
+          status: res.status,
+          statusText: res.statusText,
+          body: raw,
+        });
+        throw new Error('invalid JSON from /api/cloud');
+      }
+
+      const badge = document.getElementById('cloud-badge');
+      const cloud = (data.cloud || 'local').toLowerCase();
+      badge.className = 'cloud-badge ' + cloud;
+      const icons = { aws: '🟠', gcp: '🟢', azure: '🔵', local: '⚫' };
+      badge.innerHTML = (icons[cloud] || '☁️') + '&nbsp;&nbsp;' + cloud.toUpperCase();
+    } catch (e) {
+      console.warn('Could not fetch cloud info:', e);
+    }
+  }
+
+  async function fetchProducts() {
+    const grid = document.getElementById('product-grid');
+    try {
+      const res = await fetch(apiUrl('/api/products'));
+      if (!res.ok) {
+        const raw = await res.text();
+        let parsed = null;
+        try {
+          parsed = JSON.parse(raw);
+        } catch (_) {
+          // Keep parsed as null when response is not valid JSON.
+        }
+        console.error('Failed /api/products response:', {
+          status: res.status,
+          statusText: res.statusText,
+          body: parsed || raw,
+        });
+        throw new Error('status ' + res.status);
+      }
+      const products = await res.json();
+      renderProducts(products);
+    } catch (e) {
+      grid.innerHTML = '<div class="loading">Failed to load products.</div>';
+      showError('Failed to load products: ' + e.message);
+    }
+  }
+
+  function renderProducts(products) {
+    const grid = document.getElementById('product-grid');
+    if (!products || products.length === 0) {
+      grid.innerHTML = '<div class="loading">No products available.</div>';
+      return;
+    }
+    grid.innerHTML = products.map(p => `
+      <div class="product-card">
+        <div class="product-emoji">${PRODUCT_EMOJIS[p.id] || '📦'}</div>
+        <div class="product-name">${escHtml(p.name)}</div>
+        <div class="product-price">${fmt(p.price)}</div>
+        <button class="btn btn-primary" onclick='addToCart(${escAttr(p.id)})'>
+          ＋ Add to Cart
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function fetchCart() {
+    try {
+      const res = await fetch(apiUrl('/api/cart'));
+      if (!res.ok) throw new Error('status ' + res.status);
+      const cart = await res.json();
+      renderCart(cart);
+    } catch (e) {
+      showError('Failed to load cart: ' + e.message);
+    }
+  }
+
+  function renderCart(cart) {
+    const items = cart.items || [];
+    const countEl = document.getElementById('cart-count');
+    const itemsEl = document.getElementById('cart-items');
+    const totalEl = document.getElementById('cart-total');
+
+    const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+    const totalPrice = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+    countEl.textContent = totalQty;
+    totalEl.textContent = fmt(totalPrice);
+
+    if (items.length === 0) {
+      itemsEl.innerHTML = `
+        <div class="cart-empty">
+          <span class="empty-icon">🛒</span>
+          <p>Your cart is empty</p>
+          <p>Add some products to get started!</p>
+        </div>`;
+      return;
+    }
+
+    itemsEl.innerHTML = items.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${escHtml(item.name)}</div>
+          <div class="cart-item-meta">${fmt(item.price)} × ${item.quantity}</div>
+        </div>
+        <span class="cart-item-subtotal">${fmt(item.price * item.quantity)}</span>
+        <button class="btn btn-danger" onclick='removeFromCart(${escAttr(item.product_id)})'>
+          ✕
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function addToCart(productId) {
+    try {
+      const res = await fetch(apiUrl('/api/cart/add'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'status ' + res.status);
+      }
+      const cart = await res.json();
+      renderCart(cart);
+    } catch (e) {
+      showError('Could not add to cart: ' + e.message);
+    }
+  }
+
+  async function removeFromCart(productId) {
+    try {
+      const res = await fetch(apiUrl('/api/cart/remove/' + encodeURIComponent(productId)), {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'status ' + res.status);
+      }
+      const cart = await res.json();
+      renderCart(cart);
+    } catch (e) {
+      showError('Could not remove item: ' + e.message);
+    }
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Returns a JSON-encoded string safe to embed in an onclick="..." attribute.
+  function escAttr(val) {
+    return JSON.stringify(String(val));
+  }
+
+  // Bootstrap
+  fetchCloud();
+  fetchProducts();
+  fetchCart();
+</script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+// Package main implements a simple shopping cart backend using Go Cloud's docstore.
 package main
 
 import (
@@ -13,12 +14,12 @@ import (
 	"strings"
 	"sync"
 
-	"gocloud.dev/gcerrors"
 	"gocloud.dev/docstore"
 	_ "gocloud.dev/docstore/awsdynamodb/v2"
 	_ "gocloud.dev/docstore/gcpfirestore"
 	_ "gocloud.dev/docstore/memdocstore"
 	_ "gocloud.dev/docstore/mongodocstore"
+	"gocloud.dev/gcerrors"
 	"gopkg.in/yaml.v3"
 )
 
