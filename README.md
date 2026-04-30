@@ -1,6 +1,6 @@
 # golang-multicloud
 
-[golang-multicloud](https://github.com/udhos/golang-multicloud) is a demo using google/go-cloud Go CDK to illustrate how to build a multi-cloud ready application.
+[golang-multicloud](https://github.com/udhos/golang-multicloud) is a demo using [google/go-cloud Go CDK](https://github.com/google/go-cloud) to illustrate how to build a multi-cloud ready application.
 
 # Build
 
