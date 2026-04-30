@@ -37,8 +37,18 @@ shopping-cart-backend -config config-examples/aws.yaml
 ```bash
 export MONGO_SERVER_URL="mongodb+srv://USER:PASSWORD@ACCOUNT.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
 
-
 shopping-cart-backend -config config-examples/azure.yaml
+```
+
+### Backend on gcp
+
+- Enable Firestore API in your GCP project.
+- Set GOOGLE_APPLICATION_CREDENTIALS to your service account key file,
+    or use Application Default Credentials (gcloud auth application-default login).
+- Edit config-examples/gcp.yaml and replace YOUR_GCP_PROJECT_ID with your actual project ID.
+
+```bash
+shopping-cart-backend -config config-examples/gcp.yaml
 ```
 
 ## Frontend - Embedded on backend
