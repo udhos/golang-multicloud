@@ -3,7 +3,6 @@ package main
 
 import (
 	"context"
-	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -14,6 +13,7 @@ import (
 	"strings"
 	"sync"
 
+	multicloud "github.com/udhos/golang-multicloud"
 	"gocloud.dev/docstore"
 	_ "gocloud.dev/docstore/awsdynamodb/v2"
 	_ "gocloud.dev/docstore/gcpfirestore"
@@ -22,9 +22,6 @@ import (
 	"gocloud.dev/gcerrors"
 	"gopkg.in/yaml.v3"
 )
-
-//go:embed frontend
-var frontendFiles embed.FS
 
 // Config holds the application configuration loaded from YAML.
 type Config struct {
@@ -106,7 +103,7 @@ func main() {
 		collection: coll,
 	}
 
-	sub, err := fs.Sub(frontendFiles, "frontend")
+	sub, err := fs.Sub(multicloud.FrontendFiles, "frontend")
 	if err != nil {
 		log.Fatalf("embedding frontend: %v", err)
 	}

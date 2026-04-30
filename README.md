@@ -28,9 +28,13 @@ Create a DynamoDB table named "shopping-carts" with partition key "ID" (String).
 shopping-cart-backend -config config-examples/aws.yaml
 ```
 
-## Frontend
+## Frontend - Embedded on backend
 
-Run the shopping cart frontend.
+For convenience, the frontend static files are embedded in the backend binary.
+
+Just open your browser at http://localhost:8080/ to see the shopping cart frontend.
+
+## Frontend - Standalone
 
 You will need to serve the frontend js application.
 
