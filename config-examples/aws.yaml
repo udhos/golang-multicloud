@@ -1,0 +1,7 @@
+# AWS DynamoDB configuration
+# Prerequisites:
+#   - Create a DynamoDB table named "shopping-carts" with partition key "ID" (String)
+#   - Set AWS credentials via environment variables or IAM role:
+#       AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
+cloud: aws
+docstore_url: "dynamodb://shopping-carts?partition_key=ID"

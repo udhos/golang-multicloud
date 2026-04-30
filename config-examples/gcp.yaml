@@ -1,0 +1,8 @@
+# GCP Firestore configuration
+# Prerequisites:
+#   - Enable Firestore API in your GCP project
+#   - Set GOOGLE_APPLICATION_CREDENTIALS to your service account key file
+#       or use Application Default Credentials (gcloud auth application-default login)
+#   - Replace YOUR_GCP_PROJECT_ID with your actual project ID
+cloud: gcp
+docstore_url: "firestore://projects/YOUR_GCP_PROJECT_ID/databases/(default)/documents/carts?name_field=ID"
