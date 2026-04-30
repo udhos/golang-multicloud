@@ -4,7 +4,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/fs"
 	"log"
@@ -20,14 +19,7 @@ import (
 	_ "gocloud.dev/docstore/memdocstore"
 	_ "gocloud.dev/docstore/mongodocstore"
 	"gocloud.dev/gcerrors"
-	"gopkg.in/yaml.v3"
 )
-
-// Config holds the application configuration loaded from YAML.
-type Config struct {
-	Cloud       string `yaml:"cloud"`
-	DocstoreURL string `yaml:"docstore_url"`
-}
 
 // Product is a read-only catalog item.
 type Product struct {
@@ -64,43 +56,46 @@ var catalog = []Product{
 
 // Server holds the shared state for handler functions.
 type Server struct {
-	config     Config
-	collection *docstore.Collection
-	mu         sync.Mutex // protects cart operations
+	cloud       string
+	docstoreURL string
+	collection  *docstore.Collection
+	mu          sync.Mutex // protects cart operations
+}
+
+func deriveCloud(docstoreURL string) string {
+	scheme, _, _ := strings.Cut(docstoreURL, "://")
+	switch scheme {
+	case "dynamodb":
+		return "aws"
+	case "mongo":
+		return "azure"
+	case "firestore":
+		return "gcp"
+	case "mem":
+		return "local"
+	default:
+		return scheme
+	}
 }
 
 func main() {
-	configFile := flag.String("config", "", "Path to YAML config file (overrides SHOPPING_CART_CONFIG env var)")
-	flag.Parse()
-
-	if *configFile == "" {
-		*configFile = os.Getenv("SHOPPING_CART_CONFIG")
+	docstoreURL := os.Getenv("DOCSTORE_URL")
+	if docstoreURL == "" {
+		docstoreURL = "mem://carts/ID"
 	}
-
-	cfg := Config{
-		Cloud:       "local",
-		DocstoreURL: "mem://carts/ID",
-	}
-	if *configFile != "" {
-		data, err := os.ReadFile(*configFile)
-		if err != nil {
-			log.Fatalf("reading config file: %v", err)
-		}
-		if err := yaml.Unmarshal(data, &cfg); err != nil {
-			log.Fatalf("parsing config file: %v", err)
-		}
-	}
+	cloud := deriveCloud(docstoreURL)
 
 	ctx := context.Background()
-	coll, err := docstore.OpenCollection(ctx, cfg.DocstoreURL)
+	coll, err := docstore.OpenCollection(ctx, docstoreURL)
 	if err != nil {
-		log.Fatalf("opening docstore %q: %v", cfg.DocstoreURL, err)
+		log.Fatalf("opening docstore %q: %v", docstoreURL, err)
 	}
 	defer coll.Close()
 
 	srv := &Server{
-		config:     cfg,
-		collection: coll,
+		cloud:       cloud,
+		docstoreURL: docstoreURL,
+		collection:  coll,
 	}
 
 	sub, err := fs.Sub(multicloud.FrontendFiles, "frontend")
@@ -116,7 +111,7 @@ func main() {
 	mux.HandleFunc("/api/cart/remove/", srv.handleCartRemove)
 	mux.Handle("/", http.FileServer(http.FS(sub)))
 
-	log.Printf("Shopping cart backend starting on :8080 (cloud=%s, docstore=%s)", cfg.Cloud, cfg.DocstoreURL)
+	log.Printf("Shopping cart backend starting on :8080 (cloud=%s, docstore=%s)", cloud, docstoreURL)
 	if err := http.ListenAndServe(":8080", corsMiddleware(mux)); err != nil {
 		log.Fatalf("server: %v", err)
 	}
@@ -151,8 +146,8 @@ func (s *Server) handleCloud(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{
-		"cloud":        s.config.Cloud,
-		"docstore_url": s.config.DocstoreURL,
+		"cloud":        s.cloud,
+		"docstore_url": s.docstoreURL,
 	})
 }
 

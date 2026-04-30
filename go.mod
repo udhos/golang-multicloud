@@ -5,7 +5,6 @@ go 1.26.2
 require (
 	gocloud.dev v0.45.0
 	gocloud.dev/docstore/mongodocstore v0.45.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

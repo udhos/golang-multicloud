@@ -25,7 +25,7 @@ shopping-cart-backend
 Create a DynamoDB table named "shopping-carts" with partition key "ID" (String).
 
 ```bash
-shopping-cart-backend -config config-examples/aws.yaml
+DOCSTORE_URL="dynamodb://shopping-carts?partition_key=ID" shopping-cart-backend
 ```
 
 ### Backend on azure
@@ -37,7 +37,7 @@ shopping-cart-backend -config config-examples/aws.yaml
 ```bash
 export MONGO_SERVER_URL="mongodb+srv://USER:PASSWORD@ACCOUNT.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
 
-shopping-cart-backend -config config-examples/azure.yaml
+DOCSTORE_URL="mongo://shopping/carts?id_field=ID" shopping-cart-backend
 ```
 
 ### Backend on gcp
@@ -45,10 +45,10 @@ shopping-cart-backend -config config-examples/azure.yaml
 - Enable Firestore API in your GCP project.
 - Set GOOGLE_APPLICATION_CREDENTIALS to your service account key file,
     or use Application Default Credentials (gcloud auth application-default login).
-- Edit config-examples/gcp.yaml and replace YOUR_GCP_PROJECT_ID with your actual project ID.
+- Replace YOUR_GCP_PROJECT_ID with your actual project ID in the DOCSTORE_URL.
 
 ```bash
-shopping-cart-backend -config config-examples/gcp.yaml
+DOCSTORE_URL="firestore://projects/YOUR_GCP_PROJECT_ID/databases/(default)/documents/carts?name_field=ID" shopping-cart-backend
 ```
 
 ## Frontend - Embedded on backend

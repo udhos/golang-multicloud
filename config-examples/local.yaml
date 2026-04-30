@@ -1,3 +1,0 @@
-# Local in-memory configuration (default, no cloud account required)
-cloud: local
-docstore_url: "mem://carts/ID"
