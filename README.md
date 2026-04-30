@@ -28,6 +28,19 @@ Create a DynamoDB table named "shopping-carts" with partition key "ID" (String).
 shopping-cart-backend -config config-examples/aws.yaml
 ```
 
+### Backend on azure
+
+- Create an Azure CosmosDB account with the MongoDB API.
+- Azure will provide you with a connection string that you can use to connect to the CosmosDB account.
+- Set the MONGO_SERVER_URL environment variable to your CosmosDB connection string (the mongodocstore driver reads this env var).
+
+```bash
+export MONGO_SERVER_URL="mongodb+srv://USER:PASSWORD@ACCOUNT.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+
+
+shopping-cart-backend -config config-examples/azure.yaml
+```
+
 ## Frontend - Embedded on backend
 
 For convenience, the frontend static files are embedded in the backend binary.

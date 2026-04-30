@@ -1,9 +1,9 @@
 # Azure CosmosDB (MongoDB API) configuration
 # Prerequisites:
 #   - Create an Azure CosmosDB account with the MongoDB API
-#   - Create a database named "shopping" and a collection named "carts"
+#   - Azure will provide you with a connection string that you can use to connect to the CosmosDB account
 #   - Set the MONGO_SERVER_URL environment variable to your CosmosDB connection string
 #     (the mongodocstore driver reads this env var)
-#   Example: MONGO_SERVER_URL="mongodb://YOUR_ACCOUNT:YOUR_KEY@YOUR_ACCOUNT.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb"
+#   Example: MONGO_SERVER_URL="mongodb+srv://USER:PASSWORD@ACCOUNT.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
 cloud: azure
 docstore_url: "mongo://shopping/carts?id_field=ID"
